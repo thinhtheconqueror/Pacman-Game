@@ -272,14 +272,35 @@ def run_multiplayer_client(screen, virtual_surface, font, ip, role, server_ip=No
             virtual_surface.blit(role_t, (VIRTUAL_WIDTH//2 - role_t.get_width()//2, 160))
             
             slot_y = 210
+            
+            if isinstance(state, dict) and "pacmans" in state:
+                pac_players = state.get("pacmans", [])
+                ghost_players = [g for g in state.get("ghosts", []) if g.get("is_player")]
+                all_players = pac_players + ghost_players
+            else:
+                all_players = []
+                
             for i in range(max_p):
                 sx = VIRTUAL_WIDTH//2 - 140
                 sw, sh = 280, 45
-                if i < pc:
+                if i < len(all_players):
+                    p_data = all_players[i]
                     pygame.draw.rect(virtual_surface, (30, 60, 30), (sx, slot_y, sw, sh))
                     pygame.draw.rect(virtual_surface, (0, 200, 80), (sx, slot_y, sw, sh), 2)
-                    lbl = f"PLAYER {i+1} - " + ("PAC-MAN" if i == 0 and state.get("pacman_taken") else "GHOST")
-                    lbl_c = YELLOW if "PAC" in lbl else (180, 180, 255)
+                    if "score" in p_data:
+                        lbl = f"PLAYER {p_data['pid']} - PAC-MAN"
+                        lbl_c = YELLOW
+                    else:
+                        color = p_data["color"]
+                        if color == (255, 184, 82): c_name = "ORANGE"
+                        elif color == (0, 255, 255): c_name = "CYAN"
+                        elif color == (180, 80, 255): c_name = "PURPLE"
+                        elif color == (255, 120, 120): c_name = "L-RED"
+                        elif color == (255, 0, 0): c_name = "RED"
+                        elif color == (255, 184, 255): c_name = "PINK"
+                        else: c_name = "GHOST"
+                        lbl = f"PLAYER {p_data['pid']} - {c_name} GHOST"
+                        lbl_c = color
                 else:
                     pygame.draw.rect(virtual_surface, (20, 20, 40), (sx, slot_y, sw, sh))
                     pygame.draw.rect(virtual_surface, (60, 60, 80), (sx, slot_y, sw, sh), 2)

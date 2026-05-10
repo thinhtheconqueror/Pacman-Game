@@ -238,24 +238,37 @@ def main():
             
             # Draw player slots
             slot_y = 250
+            if isinstance(state, dict) and "pacmans" in state:
+                pac_players = state.get("pacmans", [])
+                ghost_players = [g for g in state.get("ghosts", []) if g.get("is_player")]
+                all_players = pac_players + ghost_players
+            else:
+                all_players = []
+
             for i in range(max_p):
                 slot_x = VIRTUAL_WIDTH // 2 - 150
                 slot_w = 300
                 slot_h = 50
                 
-                if isinstance(state, dict) and "pacmans" in state:
-                    all_players = state.get("pacmans", []) + state.get("ghosts", [])
-                
                 # Slot background
-                if i < p_count:
+                if i < len(all_players):
+                    p_data = all_players[i]
                     # Filled slot
                     pygame.draw.rect(virtual_surface, (30, 60, 30), (slot_x, slot_y, slot_w, slot_h))
                     pygame.draw.rect(virtual_surface, (0, 200, 80), (slot_x, slot_y, slot_w, slot_h), 2)
                     
-                    if i == 0 and (state.get("pacman_taken") if isinstance(state, dict) else False):
-                        slot_label = font_small.render(f"PLAYER {i+1}  -  PAC-MAN", True, YELLOW)
+                    if "score" in p_data: # is pacman
+                        slot_label = font_small.render(f"PLAYER {p_data['pid']}  -  PAC-MAN", True, YELLOW)
                     else:
-                        slot_label = font_small.render(f"PLAYER {i+1}  -  GHOST", True, (180, 180, 255))
+                        color = p_data["color"]
+                        if color == (255, 184, 82): c_name = "ORANGE"
+                        elif color == (0, 255, 255): c_name = "CYAN"
+                        elif color == (180, 80, 255): c_name = "PURPLE"
+                        elif color == (255, 120, 120): c_name = "L-RED"
+                        elif color == (255, 0, 0): c_name = "RED"
+                        elif color == (255, 184, 255): c_name = "PINK"
+                        else: c_name = "GHOST"
+                        slot_label = font_small.render(f"PLAYER {p_data['pid']}  -  {c_name} GHOST", True, color)
                     virtual_surface.blit(slot_label, (slot_x + 20, slot_y + 18))
                 else:
                     # Empty slot
