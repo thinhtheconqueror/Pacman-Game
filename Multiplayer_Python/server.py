@@ -47,8 +47,9 @@ for r in range(ROWS):
 # AI ghosts (only spawn 2 AI ghosts to leave room for players)
 ai_ghosts = []
 ai_ghost_colors = [RED, PINK]
-for i, (gr, gc) in enumerate(ghost_spawns[:2]):
-    ai_ghosts.append(Ghost(gr, gc, ai_ghost_colors[i % len(ai_ghost_colors)], is_hard_mode=False))
+# Bỏ sinh ma mặc định để người chơi tự chơi
+# for i, (gr, gc) in enumerate(ghost_spawns[:2]):
+#     ai_ghosts.append(Ghost(gr, gc, ai_ghost_colors[i % len(ai_ghost_colors)], is_hard_mode=False))
 
 # ── Room State ─────────────────────────────────────
 lock = threading.Lock()
@@ -136,15 +137,32 @@ def game_loop():
                     g.p_move_timer = 0
                     if pid in player_actions:
                         action = player_actions[pid]
+                        # Try the queued action first
                         n_r = g.r + action["dr"]
                         n_c = g.c + action["dc"]
+                        
                         if n_c < 0: n_c = COLS - 1
                         elif n_c >= COLS: n_c = 0
-                        if 0 <= n_r < ROWS and 0 <= n_c < COLS and grid_matrix[n_r][n_c] not in ('1', 'D'):
+                        
+                        if 0 <= n_r < ROWS and 0 <= n_c < COLS and grid_matrix[n_r][n_c] != '1':
                             g.r = n_r
                             g.c = n_c
                             g.dr = action["dr"]
                             g.dc = action["dc"]
+                        else:
+                            # If queued action is blocked, continue in the current direction
+                            curr_r = g.r + g.dr
+                            curr_c = g.c + g.dc
+                            
+                            if curr_c < 0: curr_c = COLS - 1
+                            elif curr_c >= COLS: curr_c = 0
+                            
+                            if 0 <= curr_r < ROWS and 0 <= curr_c < COLS and grid_matrix[curr_r][curr_c] != '1':
+                                g.r = curr_r
+                                g.c = curr_c
+                            else:
+                                g.dr = 0
+                                g.dc = 0
 
             # Dots logic
             for pid, p in list(player_pacmans.items()):

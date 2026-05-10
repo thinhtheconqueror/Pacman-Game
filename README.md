@@ -13,9 +13,9 @@ Không chỉ tái hiện lại lối chơi gốc, dự án còn đi sâu vào vi
 
 ## ✨ Tính năng nổi bật
 
-*   👻 **AI Tìm đường thông minh:** Sử dụng thuật toán Tìm kiếm theo chiều rộng (BFS) trên đồ thị lưới không trọng số để tính toán đường đi ngắn nhất cho ma (Ghost), tạo ra những màn rượt đuổi nghẹt thở.
-*   🕹️ **Cơ chế vật lý O(1):** Xử lý kiểm tra va chạm mượt mà dựa trên cấu trúc Mảng 2 Chiều (2D Array).
-*   🌐 **Chế độ Multiplayer (LAN):** Trải nghiệm chơi cùng bạn bè với kiến trúc Client - Server sử dụng Socket và Multi-threading.
+*   👻 **AI Tìm đường thông minh:** Sử dụng thuật toán Tìm kiếm theo chiều rộng (BFS) trên đồ thị lưới không trọng số để tính toán đường đi ngắn nhất cho ma (Ghost), tạo ra những màn rượt đuổi nghẹt thở trong chế độ Offline.
+*   🕹️ **Cơ chế vật lý O(1):** Xử lý kiểm tra va chạm mượt mà dựa trên cấu trúc Mảng 2 Chiều (2D Array). Hỗ trợ cơ chế xếp hàng hướng đi (Turn-queueing) cho cả Pac-Man và Player Ghost để luồn lách qua các góc hẹp dễ dàng.
+*   🌐 **Chế độ Multiplayer (LAN):** Trải nghiệm chơi cùng bạn bè với kiến trúc Client - Server sử dụng Socket và Multi-threading. Hỗ trợ 1 người làm Pac-Man và tối đa 4 người làm Ghost (không có AI Ghost xen vào để đảm bảo tính cạnh tranh thực tế).
 *   🎨 **Đồ họa Retro/Neon:** Hình ảnh sắc nét, nền di chuyển synthwave, hệ thống hạt (Particle System) và số điểm nổi (Floating Popup).
 *   🎵 **Âm thanh Đa kênh:** Sử dụng hệ thống 8 kênh âm thanh độc lập để phát tiếng ăn hạt, hú còi, và ăn ma cùng một lúc không bị đè tiếng.
 *   💊 **Cơ chế Frightened:** Ăn viên sức mạnh (Energizer) để đảo ngược tình thế, khiến các con ma hoảng sợ và chậm lại!
@@ -29,7 +29,7 @@ Không chỉ tái hiện lại lối chơi gốc, dự án còn đi sâu vào vi
 ### 2. Cài đặt thư viện
 Clone repository này về máy và cài đặt các thư viện cần thiết:
 ```bash
-git clone https://github.com/your-username/pacman-python-ai.git
+git clone https://github.com/thinhtheconqueror/pacman-python-ai.git
 cd pacman-python-ai
 pip install -r requirements.txt
 ```
@@ -61,4 +61,4 @@ Vui lòng xem trong thư mục [docs/](docs/) để đọc chi tiết về các 
 ---
 **Giảng viên hướng dẫn:** Nguyễn Thanh Sơn  
 **Sinh viên thực hiện:** Võ Quốc Thịnh  
-**Môn học:** Đồ án phát triển ứng dụng (IT003)
+**Môn học:** Cấu trúc dữ liệu và giải thuật (IT003)
