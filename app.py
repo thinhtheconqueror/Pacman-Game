@@ -181,6 +181,17 @@ def run_multiplayer_client(screen, virtual_surface, font, ip, role, server_ip=No
     action = {"dr": 0, "dc": 0}
     in_lobby = True
     
+    popups = []
+    particles = []
+    
+    def spawn_particles(px, py, color, amount):
+        import random
+        for _ in range(amount):
+            sx = random.uniform(-3, 3)
+            sy = random.uniform(-3, 3)
+            life = random.randint(15, 30)
+            particles.append({"x": px, "y": py, "color": color, "sx": sx, "sy": sy, "life": life, "max_life": life})
+    
     # Load sounds
     try:
         pygame.mixer.init()
@@ -308,6 +319,23 @@ def run_multiplayer_client(screen, virtual_surface, font, ip, role, server_ip=No
             grid = state.get("grid", [])
             if wall_surface is None and grid:
                 wall_surface = mp_client.create_wall_surface(grid)
+                
+            # Process effects
+            for eff in state.get("effects", []):
+                r, c = eff["r"], eff["c"]
+                px = c * CELL_SIZE
+                py = r * CELL_SIZE + UI_OFFSET_Y
+                
+                if eff["type"] == "energizer":
+                    popups.append({"text": "+50", "x": px, "y": py, "timer": 60, "color": (255, 255, 50)})
+                    spawn_particles(px + CELL_SIZE//2, py + CELL_SIZE//2, (255, 255, 50), 20)
+                elif eff["type"] == "dot":
+                    popups.append({"text": "+10", "x": px, "y": py, "timer": 30, "color": (255, 255, 255)})
+                    spawn_particles(px + CELL_SIZE//2, py + CELL_SIZE//2, (255, 255, 255), 5)
+                elif eff["type"] == "ghost":
+                    popups.append({"text": "+200", "x": px, "y": py, "timer": 60, "color": (0, 255, 255)})
+                    spawn_particles(px + CELL_SIZE//2, py + CELL_SIZE//2, (0, 255, 255), 30)
+                    
             mp_client.draw_synthwave_bg(virtual_surface)
             if wall_surface:
                 virtual_surface.blit(wall_surface, (0, 0))
@@ -333,6 +361,42 @@ def run_multiplayer_client(screen, virtual_surface, font, ip, role, server_ip=No
                 virtual_surface.blit(t1, (20, 3))
                 ts = font_arcade.render(str(scores[0][0]), True, WHITE)
                 virtual_surface.blit(ts, (20, 18))
+                
+                # Lives display
+                lives = scores[0][2]
+                for i in range(lives):
+                    lx = 30 + i * 30
+                    ly = VIRTUAL_HEIGHT - 25
+                    pygame.gfxdraw.filled_circle(virtual_surface, lx, ly, 10, YELLOW)
+                    pygame.draw.polygon(virtual_surface, (10, 0, 20), [(lx, ly), (lx+12, ly-6), (lx+12, ly+6)])
+            
+            # Update and Draw Particles
+            for p in particles[:]:
+                p["x"] += p["sx"]
+                p["y"] += p["sy"]
+                p["life"] -= 1
+                if p["life"] <= 0:
+                    particles.remove(p)
+                else:
+                    size = max(1, int(3 * (p["life"] / p["max_life"])))
+                    pygame.draw.circle(virtual_surface, p["color"], (int(p["x"]), int(p["y"])), size)
+
+            # Update and Draw Popups
+            for p in popups[:]:
+                p["timer"] -= 1
+                p["y"] -= 0.5
+                if p["timer"] <= 0:
+                    popups.remove(p)
+                else:
+                    text_surf = font_small.render(p["text"], True, p["color"])
+                    virtual_surface.blit(text_surf, (int(p["x"]), int(p["y"])))
+                    
+            # Check Game Over
+            if state.get("game_over"):
+                font_large = pygame.font.Font("PressStart2P-Regular.ttf", 28)
+                end_text = font_large.render("GAME OVER", True, (255, 50, 50))
+                virtual_surface.blit(end_text, (VIRTUAL_WIDTH // 2 - end_text.get_width() // 2, VIRTUAL_HEIGHT // 2))
+
             pc = state.get("player_count", 0)
             pt = font_small.render(f"{pc} ONLINE", True, (0, 200, 80))
             virtual_surface.blit(pt, (VIRTUAL_WIDTH - pt.get_width() - 10, 5))

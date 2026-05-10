@@ -161,6 +161,17 @@ def main():
     in_lobby = True
     game_started_local = False
     
+    popups = []
+    particles = []
+    
+    def spawn_particles(px, py, color, amount):
+        import random
+        for _ in range(amount):
+            sx = random.uniform(-3, 3)
+            sy = random.uniform(-3, 3)
+            life = random.randint(15, 30)
+            particles.append({"x": px, "y": py, "color": color, "sx": sx, "sy": sy, "life": life, "max_life": life})
+    
     while running:
         virtual_surface = pygame.Surface((VIRTUAL_WIDTH, VIRTUAL_HEIGHT), pygame.SRCALPHA)
         
@@ -283,6 +294,22 @@ def main():
             if wall_surface is None and grid:
                 wall_surface = create_wall_surface(grid)
                 
+            # Process effects
+            for eff in state.get("effects", []):
+                r, c = eff["r"], eff["c"]
+                px = c * CELL_SIZE
+                py = r * CELL_SIZE + UI_OFFSET_Y
+                
+                if eff["type"] == "energizer":
+                    popups.append({"text": "+50", "x": px, "y": py, "timer": 60, "color": (255, 255, 50)})
+                    spawn_particles(px + CELL_SIZE//2, py + CELL_SIZE//2, (255, 255, 50), 20)
+                elif eff["type"] == "dot":
+                    popups.append({"text": "+10", "x": px, "y": py, "timer": 30, "color": (255, 255, 255)})
+                    spawn_particles(px + CELL_SIZE//2, py + CELL_SIZE//2, (255, 255, 255), 5)
+                elif eff["type"] == "ghost":
+                    popups.append({"text": "+200", "x": px, "y": py, "timer": 60, "color": (0, 255, 255)})
+                    spawn_particles(px + CELL_SIZE//2, py + CELL_SIZE//2, (0, 255, 255), 30)
+                    
             # Draw background and map
             draw_synthwave_bg(virtual_surface)
             if wall_surface:
@@ -324,9 +351,36 @@ def main():
                 # Lives display
                 lives = scores[0][2]
                 for i in range(lives):
-                    lx = 20 + i * 22
-                    ly = 40
-                    pygame.gfxdraw.filled_circle(virtual_surface, lx + 8, ly + 6, 6, YELLOW)
+                    lx = 30 + i * 30
+                    ly = VIRTUAL_HEIGHT - 25
+                    pygame.gfxdraw.filled_circle(virtual_surface, lx, ly, 10, YELLOW)
+                    pygame.draw.polygon(virtual_surface, (10, 0, 20), [(lx, ly), (lx+12, ly-6), (lx+12, ly+6)])
+                    
+            # Update and Draw Particles
+            for p in particles[:]:
+                p["x"] += p["sx"]
+                p["y"] += p["sy"]
+                p["life"] -= 1
+                if p["life"] <= 0:
+                    particles.remove(p)
+                else:
+                    size = max(1, int(3 * (p["life"] / p["max_life"])))
+                    pygame.draw.circle(virtual_surface, p["color"], (int(p["x"]), int(p["y"])), size)
+
+            # Update and Draw Popups
+            for p in popups[:]:
+                p["timer"] -= 1
+                p["y"] -= 0.5
+                if p["timer"] <= 0:
+                    popups.remove(p)
+                else:
+                    text_surf = font_small.render(p["text"], True, p["color"])
+                    virtual_surface.blit(text_surf, (int(p["x"]), int(p["y"])))
+                
+            # Check Game Over
+            if state.get("game_over"):
+                end_text = font_large.render("GAME OVER", True, (255, 50, 50))
+                virtual_surface.blit(end_text, (VIRTUAL_WIDTH // 2 - end_text.get_width() // 2, VIRTUAL_HEIGHT // 2))
                 
             # Player count indicator (top right)
             pc = state.get("player_count", 0)

@@ -61,6 +61,8 @@ player_names = {}     # {player_id: role_string}
 
 pacman_taken = False   # True when someone is Pac-Man
 game_started = False   # True after the Pac-Man player triggers start
+game_over = False
+total_dots = sum(row.count('0') + row.count('2') for row in grid_matrix)
 
 # Colors for player ghosts
 ghost_player_colors = [ORANGE, CYAN, (180, 80, 255), (255, 120, 120)]
@@ -96,17 +98,20 @@ def broadcast_room_info():
 
 # ── Game Loop ──────────────────────────────────────
 pending_sounds = []  # Sound events to send to clients
+pending_effects = [] # Visual effects like score popups
 
 def game_loop():
+    global game_over, total_dots
     clock = pygame.time.Clock()
     while True:
         with lock:
-            if not game_started:
+            if not game_started or game_over:
                 clock.tick(FPS)
                 continue
             
-            # Clear sound events from previous tick
+            # Clear events from previous tick
             pending_sounds.clear()
+            pending_effects.clear()
 
             # Update player Pac-Mans
             for pid, p in list(player_pacmans.items()):
@@ -168,14 +173,21 @@ def game_loop():
             for pid, p in list(player_pacmans.items()):
                 res = p.check_eat_dot(grid_matrix)
                 if res == 'ENERGIZER':
+                    total_dots -= 1
                     pending_sounds.append('energizer')
+                    pending_effects.append({"type": "energizer", "r": p.r, "c": p.c})
                     for g in ai_ghosts:
                         g.frighten()
                     for pgid, pg in player_ghosts.items():
                         pg.frighten()
                 elif res == 'DOT':
+                    total_dots -= 1
                     pending_sounds.append('eat')
-
+                    pending_effects.append({"type": "dot", "r": p.r, "c": p.c})
+            
+            if total_dots <= 0:
+                game_over = True
+                
             # AI ghosts logic
             for g in ai_ghosts:
                 target = None
@@ -201,10 +213,20 @@ def game_loop():
                             # BFS the ghost back to spawn first
                             p.score += 200
                             pending_sounds.append('ghost')
+                            pending_effects.append({"type": "ghost", "r": g.r, "c": g.c})
                         elif not g.is_dead:
                             p.lives -= 1
-                            p.r, p.c = p.start_r, p.start_c
                             pending_sounds.append('death')
+                            if p.lives <= 0:
+                                game_over = True
+                            else:
+                                p.r, p.c = p.start_r, p.start_c
+                                for bg in all_ghosts:
+                                    bg.r, bg.c = bg.start_r, bg.start_c
+                                    bg.is_dead = False
+                                    bg.frightened_timer = 0
+                                    if hasattr(bg, 'respawn_timer'):
+                                        bg.respawn_timer = 0
 
         clock.tick(FPS)
 
@@ -244,7 +266,9 @@ def build_game_state():
         "player_count": get_player_count(),
         "pacman_taken": pacman_taken,
         "game_started": game_started,
+        "game_over": game_over,
         "sounds": list(pending_sounds),
+        "effects": list(pending_effects),
     }
 
 def threaded_client(conn, player):
