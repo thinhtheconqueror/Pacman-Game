@@ -29,8 +29,8 @@ Không chỉ tái hiện lại lối chơi gốc, dự án còn đi sâu vào vi
 ### 2. Cài đặt thư viện
 Clone repository này về máy và cài đặt các thư viện cần thiết:
 ```bash
-git clone https://github.com/thinhtheconqueror/pacman-python-ai.git
-cd pacman-python-ai
+git clone https://github.com/thinhtheconqueror/Pacman-Game
+cd Pacman-Game
 pip install -r requirements.txt
 ```
 
