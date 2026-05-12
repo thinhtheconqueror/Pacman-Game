@@ -14,6 +14,16 @@ import math
 
 _glow_cache = {}
 def get_glow_surface(color, radius):
+    """
+    Generates and caches a glowing visual effect surface for entities.
+    
+    Args:
+        color (tuple): The RGB color for the glow.
+        radius (int): The base radius of the entity to calculate glow extent.
+        
+    Returns:
+        pygame.Surface: A transparent surface containing the glowing effect.
+    """
     key = (color, radius)
     if key not in _glow_cache:
         surf = pygame.Surface((radius*4, radius*4), pygame.SRCALPHA)
@@ -35,6 +45,14 @@ class Entity:
         color (tuple): RGB color for rendering.
     """
     def __init__(self, r, c, color):
+        """
+        Initializes an entity at the specified grid coordinates.
+        
+        Args:
+            r (int): Row index.
+            c (int): Column index.
+            color (tuple): RGB color representation.
+        """
         self.r = r  # Row index
         self.c = c  # Column index
         self.color = color
@@ -62,6 +80,13 @@ class Pacman(Entity):
     Handles movement input, grid-based collision, and scoring.
     """
     def __init__(self, r, c):
+        """
+        Initializes Pacman with default state at the specified starting coordinates.
+        
+        Args:
+            r (int): Starting row index.
+            c (int): Starting column index.
+        """
         super().__init__(r, c, YELLOW)
         self.start_r = r
         self.start_c = c
@@ -230,6 +255,16 @@ class Ghost(Entity):
         is_hard_mode (bool): Whether to use BFS for intelligent tracking.
     """
     def __init__(self, r, c, color, is_hard_mode=False, ghost_type="Blinky"):
+        """
+        Initializes a Ghost with its specific AI behavior and start position.
+        
+        Args:
+            r (int): Starting row index.
+            c (int): Starting column index.
+            color (tuple): RGB color representation.
+            is_hard_mode (bool): Enables BFS pathfinding targeting.
+            ghost_type (str): Type of the ghost affecting its behavior (e.g., 'Blinky', 'Pinky').
+        """
         super().__init__(r, c, color)
         self.is_hard_mode = is_hard_mode
         self.ghost_type = ghost_type
@@ -244,10 +279,12 @@ class Ghost(Entity):
         self.start_c = c
         
     def frighten(self):
+        """Puts the ghost into a frightened state where it moves slower and can be eaten."""
         if not self.is_dead:
             self.frightened_timer = FPS * 4 # 4 seconds of frightened state
         
     def die(self):
+        """Handles the ghost's death, turning it into eyes and forcing it to return to spawn."""
         self.is_dead = True
         self.frightened_timer = 0
         

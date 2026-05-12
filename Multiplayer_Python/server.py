@@ -1,3 +1,9 @@
+"""
+server.py
+
+This module implements the authoritative multiplayer server for Pac-Man.
+It manages player connections, game state, collision logic, and broadcasts updates to clients.
+"""
 import socket
 import threading
 import pickle
@@ -6,6 +12,7 @@ import random
 from map_data import load_map_matrix
 from entities import Pacman, Ghost
 from settings import *
+from network import send_msg, recv_msg
 
 server = "0.0.0.0"
 port = 5555
@@ -44,13 +51,6 @@ for r in range(ROWS):
             ghost_spawns.append((r, c))
             grid_matrix[r][c] = ' '
 
-# AI ghosts (only spawn 2 AI ghosts to leave room for players)
-ai_ghosts = []
-ai_ghost_colors = [RED, PINK]
-# Bỏ sinh ma mặc định để người chơi tự chơi
-# for i, (gr, gc) in enumerate(ghost_spawns[:2]):
-#     ai_ghosts.append(Ghost(gr, gc, ai_ghost_colors[i % len(ai_ghost_colors)], is_hard_mode=False))
-
 # ── Room State ─────────────────────────────────────
 lock = threading.Lock()
 player_pacmans = {}   # {player_id: Pacman}  — at most 1 entry
@@ -68,6 +68,7 @@ total_dots = sum(row.count('0') + row.count('2') for row in grid_matrix)
 ghost_player_colors = [ORANGE, CYAN, (180, 80, 255), (255, 120, 120)]
 
 def get_player_count():
+    """Returns the current number of connected players in the room."""
     return len(player_pacmans) + len(player_ghosts)
 
 def get_room_info():
@@ -89,10 +90,9 @@ def get_room_info():
 def broadcast_room_info():
     """Send updated room info to all connected players."""
     info = get_room_info()
-    data = pickle.dumps(info)
     for pid, conn in list(player_connections.items()):
         try:
-            conn.sendall(data)
+            send_msg(conn, info)
         except:
             pass
 
@@ -101,6 +101,10 @@ pending_sounds = []  # Sound events to send to clients
 pending_effects = [] # Visual effects like score popups
 
 def game_loop():
+    """
+    Main server-side game loop running in a separate thread.
+    Updates all game entities, handles collisions, scores, and win/loss states.
+    """
     global game_over, total_dots
     clock = pygame.time.Clock()
     while True:
@@ -176,8 +180,6 @@ def game_loop():
                     total_dots -= 1
                     pending_sounds.append('energizer')
                     pending_effects.append({"type": "energizer", "r": p.r, "c": p.c})
-                    for g in ai_ghosts:
-                        g.frighten()
                     for pgid, pg in player_ghosts.items():
                         pg.frighten()
                 elif res == 'DOT':
@@ -187,23 +189,9 @@ def game_loop():
             
             if total_dots <= 0:
                 game_over = True
-                
-            # AI ghosts logic
-            for g in ai_ghosts:
-                target = None
-                min_d = 9999
-                for pid, p in player_pacmans.items():
-                    d = abs(g.r - p.r) + abs(g.c - p.c)
-                    if d < min_d:
-                        min_d = d
-                        target = p
-                if target:
-                    g.update(target, grid_matrix, ai_ghosts + list(player_ghosts.values()))
-                else:
-                    g.update(Pacman(1,1), grid_matrix, ai_ghosts)
 
             # Collision logic
-            all_ghosts = ai_ghosts + list(player_ghosts.values())
+            all_ghosts = list(player_ghosts.values())
             for pid, p in list(player_pacmans.items()):
                 for g in all_ghosts:
                     if g.r == p.r and g.c == p.c:
@@ -250,14 +238,6 @@ def build_game_state():
                 "r": g.r, "c": g.c, "color": g.color,
                 "frightened": g.frightened_timer > 0,
                 "dead": g.is_dead, "dr": g.dr, "dc": g.dc,
-                "is_player": False
-            }
-            for g in ai_ghosts
-        ] + [
-            {
-                "r": g.r, "c": g.c, "color": g.color,
-                "frightened": g.frightened_timer > 0,
-                "dead": g.is_dead, "dr": g.dr, "dc": g.dc,
                 "is_player": True, "pid": pid
             }
             for pid, g in player_ghosts.items()
@@ -272,6 +252,13 @@ def build_game_state():
     }
 
 def threaded_client(conn, player):
+    """
+    Handles communication with an individual connected client.
+    
+    Args:
+        conn (socket.socket): The connection object.
+        player (int): The unique player ID.
+    """
     global current_player, pacman_taken, game_started
 
     # Send player ID
@@ -279,7 +266,7 @@ def threaded_client(conn, player):
 
     # Wait for init data (role request)
     try:
-        init_data = pickle.loads(conn.recv(4096))
+        init_data = recv_msg(conn)
         requested_role = init_data.get("role", "ghost")
     except:
         conn.close()
@@ -289,10 +276,10 @@ def threaded_client(conn, player):
         # Enforce max player limit
         if get_player_count() >= MAX_PLAYERS:
             try:
-                conn.sendall(pickle.dumps({
+                send_msg(conn, {
                     "type": "error",
                     "message": "Room is full! Max {} players.".format(MAX_PLAYERS)
-                }))
+                })
             except:
                 pass
             conn.close()
@@ -310,14 +297,14 @@ def threaded_client(conn, player):
         # Send role assignment confirmation
         ghost_idx = len(player_ghosts)
         try:
-            conn.sendall(pickle.dumps({
+            send_msg(conn, {
                 "type": "role_assigned",
                 "role": assigned_role,
                 "requested": requested_role,
                 "player_id": player,
                 "player_count": get_player_count() + 1,
                 "max_players": MAX_PLAYERS,
-            }))
+            })
         except:
             conn.close()
             return
@@ -346,11 +333,9 @@ def threaded_client(conn, player):
     # Main communication loop
     while True:
         try:
-            raw = conn.recv(4096)
-            if not raw:
+            data = recv_msg(conn)
+            if data is None:
                 break
-
-            data = pickle.loads(raw)
 
             with lock:
                 # Handle special commands
@@ -359,14 +344,14 @@ def threaded_client(conn, player):
                         game_started = True
                         print("[SERVER] Game started!")
                     # Send back current state
-                    conn.sendall(pickle.dumps(build_game_state()))
+                    send_msg(conn, build_game_state())
                     continue
 
                 # Regular movement action
                 player_actions[player] = data
 
                 # Send game state back
-                conn.sendall(pickle.dumps(build_game_state()))
+                send_msg(conn, build_game_state())
 
         except Exception as e:
             break

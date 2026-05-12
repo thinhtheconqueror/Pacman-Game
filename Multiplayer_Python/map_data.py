@@ -43,6 +43,9 @@ GAME_MAP = [
 ]
 
 def load_map_matrix():
+    """
+    Returns the multiplayer maze map as a 2D list.
+    """
     grid = []
     for row in GAME_MAP:
         row = row.ljust(28, ' ')

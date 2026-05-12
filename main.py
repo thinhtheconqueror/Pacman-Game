@@ -67,6 +67,13 @@ def create_wall_surface(grid):
     return surf
 
 def draw_items(surface, grid):
+    """
+    Draws consumable items (dots and energizers) on the given surface.
+    
+    Args:
+        surface (pygame.Surface): The surface to draw the items onto.
+        grid (list[list[str]]): The grid matrix containing the map layout.
+    """
     time_ms = pygame.time.get_ticks()
     pulse = (math.sin(time_ms * 0.005) + 1) / 2
     
@@ -499,6 +506,10 @@ def game_loop(screen, font, is_hard_mode, ghost_count, clock):
         clock.tick(FPS)
 
 def load_arcade_assets():
+    """
+    Loads visual assets such as spritesheets and fonts required for the arcade mode.
+    Scales the sprites to match the configured grid cell size.
+    """
     try:
         sheet = pygame.image.load("spritesheet.png").convert()
         transcolor = sheet.get_at((0,0))

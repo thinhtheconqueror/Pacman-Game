@@ -1,70 +1,70 @@
-# 📚 Tài Liệu API & Logic Trò Chơi (Docstrings)
+# 📚 API Documentation & Game Logic (Docstrings)
 
-Tài liệu này giải thích chi tiết chức năng, tham số và độ phức tạp của các thuật toán cũng như các hàm cốt lõi được sử dụng trong hệ thống Game Pac-Man (bao gồm cả AI và Multiplayer).
+This document provides a detailed explanation of the functions, parameters, and time complexities of the core algorithms and systems used in the Pac-Man DSA Project (including AI and Multiplayer components).
 
 ---
 
-## 1. Trí Tuệ Nhân Tạo (AI) - `algorithms.py`
+## 1. Artificial Intelligence (AI) - `algorithms.py`
 
 ### 🔹 `bfs_shortest_path(start, target, grid, occupied_positions)`
-**Mô tả:** Thuật toán Tìm kiếm theo chiều rộng (BFS). Được sử dụng làm AI ở mức độ Khó (Hard). Đảm bảo tìm ra đường đi ngắn nhất để các bóng ma (Ghost) tiếp cận Pac-Man.
-* **Logic:** Duyệt qua đồ thị không trọng số (mảng 2 chiều) theo từng cấp độ (level-order traversal). Sử dụng Hàng đợi (Queue) để lưu các đỉnh chờ duyệt và Từ điển (Dictionary) để lưu vết đường đi.
-* **Tham số:**
-  * `start` *(tuple)*: Tọa độ `(row, col)` bắt đầu của Ghost.
-  * `target` *(tuple)*: Tọa độ `(row, col)` mục tiêu (thường là vị trí của Pac-Man).
-  * `grid` *(list[list[str]])*: Ma trận 2D biểu diễn mê cung.
-  * `occupied_positions` *(set, optional)*: Tập hợp các vị trí đang bị chiếm bởi Ghost khác (để AI tránh đi đè lên nhau).
-* **Trả về:** `tuple` - Tọa độ `(row, col)` bước đi tối ưu tiếp theo.
-* **Độ phức tạp:** Thời gian `O(V + E)`, Không gian `O(V)`. (Với V là số đỉnh, E là số cạnh).
+**Description:** Breadth-First Search (BFS) algorithm. Used as the Hard difficulty AI. Guarantees finding the absolute shortest path for the Ghosts to reach Pac-Man.
+* **Logic:** Performs a level-order traversal on the unweighted graph (2D grid). Utilizes a Queue for constant time `O(1)` enqueue/dequeue operations and a Dictionary to track visited nodes and reconstruct the path.
+* **Parameters:**
+  * `start` *(tuple)*: The `(row, col)` starting position of the Ghost.
+  * `target` *(tuple)*: The `(row, col)` target position (usually Pac-Man's location).
+  * `grid` *(list[list[str]])*: The 2D matrix representing the maze.
+  * `occupied_positions` *(set, optional)*: A set of positions currently occupied by other Ghosts (prevents entities from overlapping).
+* **Returns:** `tuple` - The `(row, col)` coordinate of the next optimal step.
+* **Complexity:** Time `O(V + E)`, Space `O(V)`. (Where V is the number of vertices/cells and E is the number of valid edges/moves).
 
 ### 🔹 `random_walk_algorithm(start, grid, occupied_positions)`
-**Mô tả:** Thuật toán bước ngẫu nhiên. Được sử dụng làm AI mức độ Dễ hoặc làm phương án dự phòng (fallback) khi BFS không thể tìm được đường.
-* **Logic:** Lấy tất cả các ô liền kề (không bị vướng tường) và chọn ngẫu nhiên một hướng để di chuyển.
-* **Tham số:** Giống như hàm BFS.
-* **Trả về:** `tuple` - Tọa độ bước đi tiếp theo.
-* **Độ phức tạp:** Thời gian `O(1)`.
+**Description:** Random walk algorithm. Used as the Easy difficulty AI or as a fallback when the BFS target is unreachable.
+* **Logic:** Retrieves all valid adjacent cells (not blocked by walls) and randomly selects a direction to move.
+* **Parameters:** Same as the BFS function.
+* **Returns:** `tuple` - The coordinate of the next random step.
+* **Complexity:** Time `O(1)`.
 
 ### 🔹 `get_valid_neighbors(pos, grid, occupied_positions)`
-**Mô tả:** Hàm phụ trợ tìm tất cả các ô liền kề hợp lệ (Lên, Xuống, Trái, Phải) từ một tọa độ cho trước.
-* **Logic:** Bỏ qua các ô chứa tường (`'1'`), các ô nằm ngoài bản đồ, và các ô đã có Ghost khác đứng. Tích hợp cơ chế đi xuyên hầm (Tunnel Wrap Around).
-* **Trả về:** `list[tuple]` - Danh sách các tọa độ hợp lệ.
+**Description:** Auxiliary function that finds all navigable adjacent cells (Up, Down, Left, Right) from a given coordinate.
+* **Logic:** Ignores wall cells (`'1'`), out-of-bound cells, and cells already occupied by another Ghost. Integrates the tunnel wrap-around mechanic.
+* **Returns:** `list[tuple]` - A list of valid neighboring coordinates.
 
 ---
 
-## 2. Hệ Thống Thực Thể (Entities) - `entities.py`
+## 2. Entity System - `entities.py`
 
 ### 🔹 `Ghost.frighten()`
-**Mô tả:** Kích hoạt trạng thái Hoảng Sợ (Frightened Mode) cho bóng ma khi Pac-Man ăn viên sức mạnh (Energizer).
-* **Hiệu ứng:** 
-  * Ma thay đổi giao diện (chuyển sang màu xanh dương và nhấp nháy liên tục).
-  * Tốc độ di chuyển giảm xuống đáng kể.
-  * Tạm thời bị thay đổi thuật toán di chuyển (chuyển sang đi ngẫu nhiên).
-  * Pac-Man có thể đuổi theo "ăn" ma để lấy điểm thưởng.
+**Description:** Activates the Frightened Mode for the ghost when Pac-Man consumes an Energizer.
+* **Effects:** 
+  * The ghost's appearance changes (turns dark blue and flashes white/red before ending).
+  * Movement speed is significantly reduced.
+  * The AI pathfinding algorithm is temporarily altered (switches to random walk).
+  * Pac-Man can chase and "eat" the ghost for bonus points.
 
 ---
 
-## 3. Vòng Lặp Trò Chơi (Game Loop) - `main.py`
+## 3. Game Loop - `main.py` & `app.py`
 
 ### 🔹 `main_menu()`
-**Mô tả:** Hiển thị giao diện màn hình chờ chính của trò chơi (Splash screen).
-* **Chức năng:** Cho phép người chơi lựa chọn độ khó của AI (Easy/Hard) và tùy chỉnh số lượng Ghost xuất hiện trên bản đồ trước khi tiến vào ván đấu.
+**Description:** Displays the offline game's splash screen and difficulty selection menu.
+* **Functionality:** Allows the player to choose the AI difficulty (Easy/Hard) and customize the number of Ghosts appearing on the map before starting the offline game.
 
 ### 🔹 `game_loop()`
-**Mô tả:** Vòng lặp vòng đời trò chơi của chế độ chơi Offline.
-* **Chức năng:** Xử lý toàn bộ logic liên tục trong 1 giây (Frame by frame): Nhận tín hiệu điều khiển từ người chơi, cập nhật vị trí các thực thể, kiểm tra va chạm (ăn hạt, ăn ma, bị ma bắt), quản lý điểm số, gọi hệ thống âm thanh, và vẽ (render) hình ảnh lên màn hình.
+**Description:** The core lifecycle loop of the offline game mode.
+* **Functionality:** Handles continuous frame-by-frame logic (60 FPS): receives player input, updates entity positions, handles collision detection (eating dots, eating ghosts, getting caught), manages the score, triggers audio events, and renders graphics to the screen.
 
 ### 🔹 `create_wall_surface()`
-**Mô tả:** Khởi tạo giao diện đồ họa tĩnh cho mê cung.
-* **Chức năng:** Vẽ các đường viền với độ trong suốt (alpha) theo nhiều lớp chồng lên nhau để tạo hiệu ứng tường phát sáng neon (Neon Glow Effect). Chức năng này chỉ chạy 1 lần lúc khởi tạo màn chơi, giúp tối ưu hóa FPS so với việc vẽ lại trên mỗi khung hình.
+**Description:** Initializes the static graphical surface for the maze.
+* **Functionality:** Draws transparent overlapping lines to create a neon glow effect for the walls. This function is only executed once during initialization to optimize the frame rate, avoiding the need to redraw complex wall graphics every frame.
 
 ---
 
-## 4. Mạng và Đa Người Chơi (Multiplayer) - `Multiplayer_Python/`
+## 4. Multiplayer Network - `Multiplayer_Python/`
 
 ### 🔹 Class `Network` (`network.py`)
-**Mô tả:** Đối tượng quản lý kết nối socket từ phía Client.
-* **Chức năng:** Kết nối và duy trì đường truyền đến Server, liên tục gửi thông tin điều khiển (input bàn phím) của người chơi và nhận về dữ liệu trạng thái game mới nhất (GameState) đã được mã hoá bằng `pickle`.
+**Description:** Object that manages the socket connection from the Client side.
+* **Functionality:** Establishes and maintains a TCP connection to the Server, continuously sending player control inputs (keystrokes) and receiving the latest authoritative GameState, serialized using Python's `pickle`.
 
 ### 🔹 `build_game_state()` (`server.py`)
-**Mô tả:** Hàm đóng gói toàn bộ trạng thái đồng bộ của phòng chơi tại phía Server.
-* **Chức năng:** Thu thập dữ liệu vị trí thực tế của tất cả người chơi (Pac-Man và Ghost), dữ liệu đường đi của AI, điểm số, hạt đậu còn lại trên bản đồ, các hiệu ứng âm thanh (event còi, tiếng ăn hạt)... thành một `Dictionary` hoàn chỉnh để đẩy về tất cả các Client đang kết nối nhằm tránh giật lag hay mất đồng bộ.
+**Description:** Packages the entire synchronized room state on the Server.
+* **Functionality:** Collects real-time position data of all players (Pac-Man and Ghosts), AI ghost paths, current scores, remaining map dots, and audio/visual events (sirens, eat sounds, popups)... compiling them into a complete `Dictionary` to be broadcasted to all connected Clients to ensure synchronization and prevent lag.

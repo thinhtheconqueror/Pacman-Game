@@ -1,3 +1,11 @@
+"""
+app.py
+
+This module serves as the primary launcher for the Pacman application,
+providing an interface to choose between offline and multiplayer modes.
+It handles server process management, network connections, and UI screens.
+"""
+
 import pygame
 import sys
 import threading
@@ -43,14 +51,45 @@ def kill_server_on_port(port=5555):
 from main import game_loop as offline_game_loop, main_menu as offline_main_menu, load_arcade_assets
 
 def run_offline(screen, font, clock):
+    """
+    Runs the game in offline mode.
+    
+    Args:
+        screen (pygame.Surface): The main display surface.
+        font (pygame.font.Font): The font used for text rendering.
+        clock (pygame.time.Clock): The pygame clock for frame rate control.
+    """
     is_hard_mode, ghost_count = offline_main_menu(screen, font)
     offline_game_loop(screen, font, is_hard_mode, ghost_count, clock)
 
 def draw_text_center(surface, text, font, color, y):
+    """
+    Draws text centered horizontally on the given surface at a specific y-coordinate.
+    
+    Args:
+        surface (pygame.Surface): The surface to draw on.
+        text (str): The text to render.
+        font (pygame.font.Font): The font to use.
+        color (tuple): RGB color of the text.
+        y (int): The y-coordinate to draw the text at.
+    """
     text_surf = font.render(text, True, color)
     surface.blit(text_surf, (VIRTUAL_WIDTH//2 - text_surf.get_width()//2, y))
     
 def input_screen(screen, virtual_surface, font, prompt, default_val=""):
+    """
+    Displays an input screen for the user to type text.
+    
+    Args:
+        screen (pygame.Surface): The main display surface.
+        virtual_surface (pygame.Surface): The virtual resolution surface.
+        font (pygame.font.Font): The font to use for rendering text.
+        prompt (str): The prompt text to display.
+        default_val (str): Default value in the input box.
+        
+    Returns:
+        str: The string input entered by the user.
+    """
     clock = pygame.time.Clock()
     user_text = default_val
     input_active = True
@@ -95,6 +134,17 @@ def input_screen(screen, virtual_surface, font, prompt, default_val=""):
         clock.tick(60)
 
 def role_selection_screen(screen, virtual_surface, font):
+    """
+    Displays a screen for the user to select their role (Pacman or Ghost).
+    
+    Args:
+        screen (pygame.Surface): The main display surface.
+        virtual_surface (pygame.Surface): The virtual resolution surface.
+        font (pygame.font.Font): The font used for text.
+        
+    Returns:
+        str: The selected role, either 'pacman' or 'ghost'.
+    """
     clock = pygame.time.Clock()
     
     while True:
@@ -144,6 +194,17 @@ def show_message_screen(screen, virtual_surface, font, message, color, duration=
         clock.tick(60)
 
 def run_multiplayer_client(screen, virtual_surface, font, ip, role, server_ip=None):
+    """
+    Runs the multiplayer client, connecting to a server and rendering game state.
+    
+    Args:
+        screen (pygame.Surface): The main display surface.
+        virtual_surface (pygame.Surface): The virtual resolution surface.
+        font (pygame.font.Font): The font for text rendering.
+        ip (str): The IP address of the server to connect to.
+        role (str): The initial role selected by the user.
+        server_ip (str, optional): The server IP if hosting locally.
+    """
     import math
     # Dynamically import the multiplayer logic so it doesn't conflict with main.py
     sys.path.insert(0, os.path.join(current_dir, "Multiplayer_Python"))
@@ -443,6 +504,10 @@ def run_multiplayer_client(screen, virtual_surface, font, ip, role, server_ip=No
     sys.path.pop(0)
 
 def main():
+    """
+    Main application entry point. Initializes pygame, loads assets,
+    and displays the main menu for selecting game modes.
+    """
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN | pygame.SCALED)
     pygame.display.set_caption("Pacman Ultimate App")

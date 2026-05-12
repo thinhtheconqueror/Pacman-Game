@@ -1,3 +1,8 @@
+"""
+client.py
+
+Handles the multiplayer client-side logic, rendering the game state received from the server.
+"""
 import pygame
 import pygame.gfxdraw
 import sys
@@ -8,6 +13,7 @@ from entities import Pacman, Ghost
 from map_data import load_map_matrix
 
 def create_wall_surface(grid):
+    """Generates the static glowing neon wall surface for the multiplayer map."""
     surf = pygame.Surface((VIRTUAL_WIDTH, VIRTUAL_HEIGHT), pygame.SRCALPHA)
     pad = 8
     
@@ -56,6 +62,7 @@ def create_wall_surface(grid):
     return surf
 
 def draw_items(surface, grid):
+    """Draws consumable items (dots and energizers) on the given surface."""
     time_ms = pygame.time.get_ticks()
     pulse = (math.sin(time_ms * 0.005) + 1) / 2
     
@@ -80,6 +87,7 @@ def draw_items(surface, grid):
                     pygame.gfxdraw.filled_circle(surface, cx, cy, int(eng_r), eng_c)
 
 def draw_synthwave_bg(surface):
+    """Draws a moving 2026 outrun / synthwave grid background."""
     time_ms = pygame.time.get_ticks()
     surface.fill((10, 0, 20, 255))
     offset = (time_ms * 0.05) % CELL_SIZE
@@ -94,6 +102,7 @@ def draw_synthwave_bg(surface):
         pygame.draw.line(surface, grid_color, (0, y), (VIRTUAL_WIDTH, y), 1)
 
 def main():
+    """Main entry point for the standalone multiplayer client."""
     print("================================")
     print("    MULTIPLAYER PACMAN DSA      ")
     print("================================")
