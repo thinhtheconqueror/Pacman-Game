@@ -114,4 +114,4 @@ python app.py
 
 ## 7. KẾT LUẬN
 
-Dự án đã hoàn thành các mục tiêu ứng dụng trực tiếp những cấu trúc dữ liệu căn bản (Mảng 2D, Hàng đợi, Bảng băm) và các giải thuật kinh điển (Duyệt đồ thị theo chiều rộng) vào việc giải quyết bài toán tìm đường và tối ưu hóa hệ thống vật lý trong trò chơi. Đồng thời, dự án cũng mở rộng được khả năng lập trình ứng dụng phân tán thông qua kiến trúc mạng Client-Server cơ bản.
+Dự án đã hoàn thành các mục tiêu ứng dụng trực tiếp những cấu trúc dữ liệu căn bản (Mảng 2D, Hàng đợi) và các giải thuật kinh điển (Duyệt đồ thị theo chiều rộng) vào việc giải quyết bài toán tìm đường và tối ưu hóa hệ thống vật lý trong trò chơi. Đồng thời, dự án cũng mở rộng được khả năng lập trình ứng dụng phân tán thông qua kiến trúc mạng Client-Server cơ bản.
