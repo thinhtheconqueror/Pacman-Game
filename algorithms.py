@@ -51,8 +51,8 @@ def get_valid_neighbors(pos, grid, occupied_positions=None):
 
 def random_walk_algorithm(start, grid, occupied_positions=None):
     """
-    EASY DIFFICULTY AI:
-    Logic: Random selection of valid neighbors.
+    FRIGHTENED / FALLBACK AI:
+    Logic: Random selection of valid neighbors. Used when ghosts are frightened or trapped.
     
     This algorithm simulates basic or "confused" ghost behavior by picking
     a random valid direction at each step.
