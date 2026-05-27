@@ -76,7 +76,7 @@ def random_walk_algorithm(start, grid, occupied_positions=None):
 
 def bfs_shortest_path(start, target, grid, occupied_positions=None):
     """
-    HARD DIFFICULTY AI (Breadth-First Search):
+    CORE AI FOR BOTH EASY AND HARD MODE (Breadth-First Search):
     Logic: Level-order traversal to find the shortest path in an unweighted graph.
     
     Guarantees the absolute shortest path to the target (Pacman) by exploring
