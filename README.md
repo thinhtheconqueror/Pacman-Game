@@ -28,16 +28,20 @@ Bản đồ trong trò chơi được mô hình hóa dưới dạng một đồ 
 - **Tính toán:** Mỗi ô vuông (cell) hợp lệ trên bản đồ được xem là một đỉnh (Vertex), và sự liền kề giữa các ô (trên, dưới, trái, phải) đại diện cho các cạnh (Edge) nối giữa chúng. Việc kiểm tra tính hợp lệ của đường đi (kiểm tra va chạm với tường) được thực hiện với độ phức tạp O(1) nhờ đặc tính truy xuất trực tiếp của mảng.
 
 ### 3.2. Thuật toán Tìm kiếm theo chiều rộng (Breadth-First Search - BFS)
-Được sử dụng làm thuật toán lõi cho Trí tuệ nhân tạo (Hard AI) của các Ghost để tính toán đường đi ngắn nhất đến vị trí của Pac-Man.
+Được sử dụng làm thuật toán lõi cho Trí tuệ nhân tạo (cho cả 2 chế độ Easy và Hard) của các Ghost để tính toán đường đi ngắn nhất đến vị trí mục tiêu.
 - **Cấu trúc dữ liệu hỗ trợ:** 
   - `Queue` (Hàng đợi - triển khai bằng `collections.deque` trong Python) để duyệt các đỉnh theo từng mức (level-order) với thời gian O(1) cho các thao tác enqueue/dequeue.
   - `Dictionary` (Bảng băm) để lưu vết đường đi (parent map), phục vụ cho quá trình truy vết (backtracking) từ đích về điểm xuất phát.
+  - `Set` (Tập hợp) dùng để lưu trữ tọa độ các con ma khác (chướng ngại vật động) giúp thuật toán kiểm tra đụng độ và tự động tránh va chạm với độ phức tạp O(1).
 - **Độ phức tạp:** Thời gian O(V + E) và Không gian O(V), tối ưu cho đồ thị không trọng số như bản đồ lưới của Pac-Man.
-- **Cải tiến:** Tích hợp logic tìm hướng đón lõng trước (nhắm vào các ô phía trước hướng di chuyển của Pac-Man) để tăng độ khó và tính chiến thuật.
+- **Cải tiến chiến thuật (Điểm phân biệt độ khó):**
+  - **Dễ (Easy):** Mục tiêu BFS luôn trỏ vào vị trí hiện tại của Pac-Man (Chỉ bám đuôi).
+  - **Khó (Hard):** Tích hợp logic tìm hướng đón lõng cho một số Ghost đặc biệt (như Pinky - đặt mục tiêu chặn trước 4 ô theo hướng di chuyển của Pac-Man) để tạo ra thế gọng kìm vây bắt.
 
-### 3.3. Thuật toán Random Walk
-Được sử dụng cho chế độ dễ (Easy AI) hoặc khi Ghost ở trạng thái bị hoảng sợ (Frightened Mode).
+### 3.3. Thuật toán Đi ngẫu nhiên (Random Walk)
+Được sử dụng khi Ghost ở trạng thái bị hoảng sợ (Frightened Mode) hoặc làm phương án dự phòng (Fallback).
 - **Cơ chế:** Thuật toán duyệt qua các đỉnh kề hợp lệ hiện tại và thực hiện chọn ngẫu nhiên một đỉnh tiếp theo để di chuyển.
+- **Sử dụng:** Được dùng để giả lập sự mất phương hướng, hoảng loạn chạy trốn khi bị Pac-Man ăn viên sức mạnh. Đồng thời làm phương án dự phòng (gỡ kẹt) khi thuật toán BFS đụng ngõ cụt.
 - **Độ phức tạp:** Thời gian O(1) do số lượng đỉnh kề tối đa luôn <= 4.
 
 ---
@@ -114,4 +118,4 @@ python app.py
 
 ## 7. KẾT LUẬN
 
-Dự án đã hoàn thành các mục tiêu ứng dụng trực tiếp những cấu trúc dữ liệu căn bản (Mảng 2D, Hàng đợi) và các giải thuật kinh điển (Duyệt đồ thị theo chiều rộng) vào việc giải quyết bài toán tìm đường và tối ưu hóa hệ thống vật lý trong trò chơi. Đồng thời, dự án cũng mở rộng được khả năng lập trình ứng dụng phân tán thông qua kiến trúc mạng Client-Server cơ bản.
+Dự án đã hoàn thành các mục tiêu ứng dụng trực tiếp những cấu trúc dữ liệu căn bản (Mảng 2D, Hàng đợi, Bảng băm) và các giải thuật kinh điển (Duyệt đồ thị theo chiều rộng) vào việc giải quyết bài toán tìm đường và tối ưu hóa hệ thống vật lý trong trò chơi. Đồng thời, dự án cũng mở rộng được khả năng lập trình ứng dụng phân tán thông qua kiến trúc mạng Client-Server cơ bản.
