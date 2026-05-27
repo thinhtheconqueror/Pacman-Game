@@ -13,7 +13,6 @@ import subprocess
 import os
 import socket
 
-# Ensure we are in the correct directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(current_dir)
 
@@ -45,9 +44,9 @@ def kill_server_on_port(port=5555):
                                    capture_output=True)
                     print(f"Killed old server process (PID {pid})")
     except Exception as e:
-        pass  # Silently ignore if we can't find/kill
+        pass  # Silently ignore if can't find/kill
 
-# We can import the offline main menu and loop
+# Import the offline main menu and loop
 from main import game_loop as offline_game_loop, main_menu as offline_main_menu, load_arcade_assets
 
 def run_offline(screen, font, clock):
