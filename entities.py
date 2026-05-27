@@ -361,7 +361,6 @@ class Ghost(Entity):
                     next_pos = bfs_shortest_path(current_pos, target_pos, grid, occupied_positions=occupied)
                 else:
                     # Easy AI: Chase but without type-specific advanced targeting (just follows Pacman)
-                    # We removed the 25% random walk so they don't look "frightened" when they recover
                     next_pos = bfs_shortest_path(current_pos, target_pos, grid, occupied_positions=occupied)
                 
             # Apply movement
